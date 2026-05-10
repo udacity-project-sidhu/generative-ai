@@ -22,20 +22,12 @@ The motivation for restricting to a two-class subset is that a small VAE trained
 
 ### Architecture
 
-The model is a small convolutional VAE with three down-sampling encoder blocks and three up-sampling decoder blocks; latent dimension is 64. Each spatial halving doubles the channel count, a standard convolutional-autoencoder pattern [3].
+The model is a small convolutional VAE with three down-sampling encoder blocks and three up-sampling decoder blocks; latent dimension is 64. Each spatial halving doubles the channel count, a standard convolutional-autoencoder pattern [3]. The full layer stack is:
 
-| Stage | Layer | Output shape |
-|---|---|---|
-| input | — | 3 × 32 × 32 |
-| encoder | Conv 4×4 stride 2 + ReLU | 32 × 16 × 16 |
-|         | Conv 4×4 stride 2 + ReLU | 64 × 8 × 8 |
-|         | Conv 4×4 stride 2 + ReLU | 128 × 4 × 4 |
-|         | flatten + 2×Linear | $\mu, \log\sigma^2 \in \mathbb{R}^{64}$ |
-| sample | reparameterisation $z = \mu + \sigma \odot \varepsilon$ | $\mathbb{R}^{64}$ |
-| decoder | Linear → reshape | 128 × 4 × 4 |
-|         | ConvTranspose 4×4 stride 2 + ReLU | 64 × 8 × 8 |
-|         | ConvTranspose 4×4 stride 2 + ReLU | 32 × 16 × 16 |
-|         | ConvTranspose 4×4 stride 2 + Sigmoid | 3 × 32 × 32 |
+- **Input:** 3 × 32 × 32 RGB image.
+- **Encoder:** Conv 4×4 stride 2 + ReLU → 32 × 16 × 16; Conv 4×4 stride 2 + ReLU → 64 × 8 × 8; Conv 4×4 stride 2 + ReLU → 128 × 4 × 4; flatten + two Linear heads producing $\mu, \log\sigma^2 \in \mathbb{R}^{64}$.
+- **Sampling:** reparameterisation $z = \mu + \sigma \odot \varepsilon$ with $\varepsilon \sim \mathcal{N}(0, I)$, giving $z \in \mathbb{R}^{64}$.
+- **Decoder:** Linear → reshape to 128 × 4 × 4; ConvTranspose 4×4 stride 2 + ReLU → 64 × 8 × 8; ConvTranspose 4×4 stride 2 + ReLU → 32 × 16 × 16; ConvTranspose 4×4 stride 2 + Sigmoid → 3 × 32 × 32.
 
 The **reparameterisation trick** [1] makes the stochastic latent sample differentiable with respect to the encoder parameters and is what enables end-to-end gradient training of the variational objective. **Convolutional layers** are appropriate because CIFAR images have strong spatial locality and convolutions provide weight-shared, translation-equivariant feature extraction, which is foundational to modern image-generation architectures [3].
 
@@ -69,13 +61,13 @@ The held-out CIFAR-10 vehicle test split (2,000 images) is used as an unseen-dat
 
 ![Figure 2. Per-epoch training and validation ELBO (left) and the per-epoch decomposition into reconstruction (BCE) and KL terms (right).](fig_loss.png)
 
-| Epoch | train ELBO/img | val ELBO/img | train BCE | train KL |
-|------:|---------------:|-------------:|----------:|---------:|
-|  1 | 2020.17 | 1910.62 | 2008.77 | 11.40 |
-|  5 | 1814.81 | 1812.90 | 1781.39 | 33.42 |
-| 10 | 1784.52 | 1794.39 | 1743.72 | 40.80 |
-| 15 | 1775.67 | 1776.65 | 1731.36 | 44.30 |
-| 20 | **1771.61** | **1773.14** | 1725.48 | 46.13 |
+Selected per-epoch metrics (per-image, lower is better for ELBO/BCE; KL grows as the latent code becomes informative):
+
+- **Epoch 1:** train ELBO 2020.17, val ELBO 1910.62, train BCE 2008.77, train KL 11.40.
+- **Epoch 5:** train ELBO 1814.81, val ELBO 1812.90, train BCE 1781.39, train KL 33.42.
+- **Epoch 10:** train ELBO 1784.52, val ELBO 1794.39, train BCE 1743.72, train KL 40.80.
+- **Epoch 15:** train ELBO 1775.67, val ELBO 1776.65, train BCE 1731.36, train KL 44.30.
+- **Epoch 20:** train ELBO **1771.61**, val ELBO **1773.14**, train BCE 1725.48, train KL 46.13.
 
 Both the reconstruction (BCE) and KL components decreased smoothly throughout training. The KL term **grew** from 11.4 to 46.1 over the 20 epochs — the encoder is putting non-trivial information into the latent code rather than collapsing posterior $q(z|x)$ onto the prior, which would be the diagnostic signature of **posterior collapse** [4]. Training and validation ELBO track closely throughout (the largest train/val gap is ~1.5 ELBO points at epoch 10), so there is no evidence of substantial overfitting in the available training budget. A small validation noise spike at epoch 17 (val 1794, vs the surrounding ~1779 trend) is consistent with mini-batch and reparameterisation-noise stochasticity rather than instability.
 
@@ -148,4 +140,4 @@ The ethical reasoning above is directly grounded in the actual outputs of this m
 
 [7] B. Chesney and D. Citron, "Deep Fakes: A Looming Challenge for Privacy, Democracy, and National Security," *California Law Review*, vol. 107, pp. 1753–1820, 2019.
 
-[8] PyTorch Contributors, "torchvision.datasets.CIFAR10 — PyTorch Documentation." [Online]. Available: <https://pytorch.org/vision/stable/generated/torchvision.datasets.CIFAR10.html>
+[8] PyTorch Contributors, "torchvision.datasets.CIFAR10 — PyTorch Documentation," pytorch.org/vision/stable, accessed 2026.
