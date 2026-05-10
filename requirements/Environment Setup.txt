@@ -1,0 +1,36 @@
+Local Machine Instructions
+Before you begin the project, make sure your environment is set up correctly. This will help you avoid errors and ensure your generative AI notebook runs smoothly from start to finish.
+
+Install Python 3.x You can use any recent version of Python 3 (3.9 or higher).
+Install a notebook environment You may use any of the following:
+Jupyter Notebook
+JupyterLab
+VS Code with the Jupyter Extension
+Anaconda (includes Jupyter by default)
+Install required Python libraries Make sure the following libraries are installed:
+NumPy
+Pandas
+Matplotlib
+Seaborn
+PyTorch Depending on your chosen generative model, you may also use libraries covered in your coursework for text or image processing. All tools must come from approved course materials. If you are using Anaconda, many of these libraries may already be available.
+Validate Your Environment
+Open a new Jupyter Notebook.
+Run the following code to confirm that the required libraries import correctly:
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import torch
+Confirm PyTorch can detect your device:
+device = "cuda" if torch.cuda.is_available() else "cpu"
+device
+Load a small sample of your dataset to confirm file access works correctly:
+df = pd.read_csv("your_dataset.csv")
+df.head()
+If the imports run without errors and the dataset loads correctly, your environment is ready.
+
+Create Your requirements.txt File
+Before submitting your project, generate a reproducibility file from your environment:
+
+    pip freeze > requirements.txt
+This file allows others to rerun your notebook using the same package versions.

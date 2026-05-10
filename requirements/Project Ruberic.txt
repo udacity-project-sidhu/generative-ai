@@ -1,0 +1,56 @@
+Rubric
+Use this project rubric to understand and assess the project criteria.
+
+Technical Implementation
+Criteria	Submission Requirements
+Generative Model Implementation
+
+A generative model appropriate to the chosen task is implemented using approved course tools (GAN, VAE, or Transformer-based generation). The notebook runs without errors and includes model definition, training logic, and generation steps. Generated outputs are produced successfully.
+
+Training and Execution
+
+The model trains and generates outputs as intended. Training behavior or diagnostics (for example: loss trends, stability indicators, or convergence behavior) are shown where applicable. The implementation reflects correct use of the chosen generative approach.
+
+Analytical Reasoning
+Criteria	Submission Requirements
+Task Definition and Model Choice
+
+The generative task is clearly defined. The selected model type is appropriate for the task and data or prompt source. Key design choices are explained logically.
+
+Output Evaluation
+
+The student evaluates generated outputs using qualitative analysis grounded in their own results. Strengths, limitations, and failure cases are discussed using specific examples from the student’s generated samples.
+
+Justification and Evidence
+
+Claims and interpretations in the written report are supported by the student’s own implementation, outputs, and observations. Citations are used when referencing generative concepts, best practices, or evaluation approaches.
+
+Ethical and Responsible Practice
+Criteria	Submission Requirements
+Ethical Reflection
+
+The written report includes at least one ethical concern relevant to the generative system. The discussion is tied directly to the student’s data, model, or outputs and addresses issues such as bias, misuse, creative ownership, or societal impact.
+
+Responsible Use Reasoning
+
+The student explains how design choices, data, or outputs relate to responsible use considerations. Ethical reasoning is specific and grounded in the project context.
+
+Communication and Presentation
+Criteria	Submission Requirements
+Notebook Organization
+
+The notebook is clearly organized with readable Markdown explanations. Model design, training, and output generation steps are easy to follow.
+
+Written Report Quality
+
+The Generative AI Analysis and Ethics Report is clearly written and structured. It communicates tec
+
+Reproducibility and Professional Practice
+Criteria	Submission Requirements
+Reproducibility
+
+A correct requirements.txt file is included and generated from the working environment. Dataset or prompt source access is clearly documented so the project can be rerun.
+
+Academic Integrity
+
+Generated outputs come from the student’s own model runs. Analysis references specific outputs produced by the student. Ethical discussion and interpretation are grounded in the student’s actual implementation and results.

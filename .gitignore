@@ -1,0 +1,19 @@
+# venv
+.venv/
+
+# Editor
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data (auto-downloaded by torchvision)
+Generative AI/data/
+
+# OS
+Thumbs.db
+.DS_Store

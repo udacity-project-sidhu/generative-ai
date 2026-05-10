@@ -1,0 +1,107 @@
+Project 5 — Generative AI Applications
+Implementation of Generative Models and Responsible Innovation
+
+What You Will Submit
+generative_model.ipynb
+Generative_AI_Analysis_Report.pdf
+requirements.txt
+Your dataset file (CSV, image set, text corpus) or clearly documented prompt or data source
+Project Instructions
+Task 1 — Define the Generative Task and Select Your Approach
+For this project, you will define a generative AI task and implement a generative model using methods covered in your coursework. Selecting an appropriate generative approach and clearly framing the task are part of the assessment.
+
+You must choose one of the following generative modeling approaches:
+
+Generative Adversarial Network (GAN) for image generation
+Variational Autoencoder (VAE) for image generation or representation learning
+Transformer-based generation for text or sequence data
+You are not required to implement diffusion models. Diffusion models may be discussed conceptually in your written report when comparing generative approaches or addressing ethical considerations.
+
+Clearly state the goal of your generative system and what type of content it produces.
+
+Dataset or Prompt Requirements
+Your dataset or prompt source must:
+
+Be appropriate for the chosen generative task
+Be publicly available or clearly documented
+Be appropriate for academic use
+Not be synthetic or AI-generated as a dataset
+Not be reused from any previous capstone project
+Document how your data or prompt source was obtained and how it is used in your model.
+
+Task 2 — Load and Inspect Your Data or Prompt Source
+In generative_model.ipynb:
+
+Load your dataset or define your prompt source
+Display representative samples such as images, text excerpts, or sequences
+Inspect data structure, formats, and sizes
+Note any preprocessing considerations
+This ensures you understand how inputs flow into the generative model.
+
+Task 3 — Implement and Train a Generative Model
+Using approved frameworks and methods from your coursework, implement and train your generative model.
+
+Your notebook must include:
+
+The full model architecture definition
+A brief Markdown explanation of key design choices
+Training code with appropriate loss functions and optimizers
+Evidence of training progress, such as loss curves or training diagnostics
+The goal is a correct and stable implementation rather than perfect outputs.
+
+Task 4 — Generate and Evaluate Outputs
+Generate sample outputs from your trained model.
+
+Your notebook must include:
+
+Multiple generated examples
+A qualitative evaluation of output quality
+Discussion of strengths and failure cases
+Quantitative metrics are optional where appropriate.
+
+Task 5 — Write a Short Notebook Summary
+Add a brief Markdown section of 4 to 6 sentences summarizing:
+
+The generative task and model used
+Characteristics of generated outputs
+Challenges encountered during training
+Observed limitations or failure modes
+This concludes your notebook.
+
+Task 6 — Write the Generative AI Analysis Report with Academic Citations
+Create Generative_AI_Analysis_Report.pdf with the following sections.
+
+Overview
+Explain the generative task, dataset, or prompt source, and model type used.
+
+Dataset or Prompt Description
+Describe the data or prompt source, its size or scope, and how it supports the generative task.
+
+Model Design and Training Approach
+Explain the model architecture, training setup, and key design decisions.
+
+Output Evaluation and Interpretation
+Discuss generated outputs, highlighting quality, variability, and limitations.
+
+Ethical Considerations and Responsible Use
+Identify at least one ethical concern related to bias, misuse, creative ownership, or societal impact.
+
+Limitations and Future Improvements
+Describe limitations of the model or data and propose realistic next steps.
+
+Citation Requirements
+Use citations when:
+
+Defining generative modeling concepts
+Justifying architectural or training decisions
+Discussing ethical or responsible-use considerations
+Do not cite your own code, training logs, or generated outputs.
+
+References
+List all cited sources using a consistent citation style.
+
+Task 7 — Create requirements.txt
+Generate your reproducibility file using:
+
+pip freeze > requirements.txt
+This ensures the generative AI workflow can be rerun in an identical environment.

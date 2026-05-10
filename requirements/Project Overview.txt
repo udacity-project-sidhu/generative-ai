@@ -1,0 +1,95 @@
+Overview
+In this project, you will design, implement, and evaluate a small-scale generative AI system using the generative modeling techniques you developed in your Nanodegree. You will choose a generative task and dataset, build and run a generative model, examine the quality and behavior of the generated outputs, and reflect on ethical considerations such as bias, misuse, or creative ownership.
+
+This project uses only the tools you already know:
+
+Python
+NumPy
+Pandas
+PyTorch
+Matplotlib / Seaborn
+Jupyter Notebooks
+You are building and running generative models in this project. The focus is on correct implementation, thoughtful evaluation of generated outputs, and responsible reasoning rather than producing polished or production-ready generations.
+
+Why This Project Matters
+Generative AI systems introduce unique technical and ethical challenges beyond traditional predictive modeling. Employers expect professionals to:
+
+Implement generative models correctly using established architectures
+Understand how training data influences generated outputs
+Evaluate output quality using appropriate qualitative and quantitative approaches
+Recognize risks related to bias, misuse, hallucination, or creative ownership
+Communicate limitations and responsible-use considerations clearly
+Connect technical design decisions to ethical implications
+This project develops the applied judgment required to work responsibly with generative systems and prepares you for advanced generative and agentic AI work later in the capstone.
+
+What You Will Build
+You will create:
+
+A Jupyter Notebook (generative_ai.ipynb) that:
+loads and preprocesses a dataset appropriate for generative modeling
+implements and runs a generative model (GAN, VAE, diffusion model, or Transformer-based text or image generation)
+generates sample outputs from the trained model
+includes visualizations or examples that support evaluation of output quality
+documents key design choices and observations using Markdown cells
+A Generative AI Analysis and Ethics Report (module_summary.pdf) that explains:
+the generative task and why it is appropriate for the chosen model
+the dataset and how it was prepared
+the model architecture and training approach
+how output quality was evaluated
+ethical considerations related to bias, misuse, or creative ownership
+limitations, risks, and potential improvements
+This report must include in-text citations and a References section.
+Citation Expectations
+In your Generative AI Analysis and Ethics Report, you must use citations when you:
+
+refer to generative modeling concepts or definitions (for example: GANs, VAEs, diffusion, attention mechanisms, or sampling strategies)
+justify why a particular generative model or architecture is appropriate for your task
+discuss evaluation practices for generative outputs
+address ethical considerations, bias, misuse, or intellectual property concerns
+You do not need to cite your own code, generated samples, plots, or observations that come directly from your notebook outputs. Your report must end with a References section listing all sources used, such as course materials, textbooks, or official framework documentation.
+
+Academic Integrity Expectations
+This project is designed to require authentic, individual work:
+
+Generated outputs must come from your own model runs and dataset.
+Your analysis must reference specific examples from your generated outputs.
+Ethical reflection must be directly tied to your model, data, and task context.
+Design decisions must be justified based on your actual implementation and results.
+Generic descriptions or ethical statements not grounded in your work will not meet project expectations.
+
+Submission Instructions
+Make sure your submission includes all of the following components.
+
+Notebook
+generative_model.ipynb runs top to bottom without execution errors
+Dataset or prompt source loads correctly, and any preprocessing steps are clearly shown
+A generative model appropriate to the task (GAN, VAE, or Transformer-based generation) is fully implemented using approved course tools
+Model training or execution is demonstrated with appropriate outputs (for example, loss curves, diagnostics, or generation steps)
+Multiple generated samples are produced and displayed
+Qualitative evaluation of generated outputs is included in Markdown cells
+A short notebook summary section (4 to 6 sentences) is included
+Generative AI Analysis and Ethics Report
+Generative_AI_Analysis_Report.pdf is included
+Report contains all required sections:
+Overview
+Dataset or Prompt Description
+Model Design and Training Approach
+Output Evaluation and Interpretation
+Ethical Considerations and Responsible Use
+Limitations and Future Improvements
+References
+Model and training decisions are justified using the student’s own implementation and generated outputs
+At least one concrete example of generated behavior or failure case is discussed
+Ethical discussion is explicitly tied to the student’s model, data, or outputs
+In-text citations are used where required
+References section uses a consistent citation style
+At least two credible sources are cited, with at least one scholarly source
+Dataset or Prompt Source
+Dataset files are included or accessible, and prompt sources are clearly documented
+Data or prompts are appropriate for the chosen generative task
+Dataset or prompt source is not synthetic, AI-generated as a dataset, or reused from a prior capstone project
+requirements.txt
+requirements.txt file is included
+File was generated from the working environment using:
+pip freeze > requirements.txt
+If all items above are present and complete, the project is ready for submission.
