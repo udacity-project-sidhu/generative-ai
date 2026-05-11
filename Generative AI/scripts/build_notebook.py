@@ -393,21 +393,21 @@ md("""## 7. Notebook Summary
 
 This notebook implemented and trained a small convolutional Variational
 Autoencoder (latent dim 64, ~370k parameters) on the `automobile`+`truck`
-subset of CIFAR-10 to perform unconditional image generation. Training was run
-for 20 epochs on CPU using Adam and the standard ELBO objective; both the
-reconstruction (BCE) and KL components decreased smoothly and the train/test
-ELBO tracked closely, indicating no severe overfitting in the available
-training budget. The principal training challenge was the **CPU-only compute
-budget** (no CUDA was available in the Hyper-V development VM), which capped
-practical training at roughly 14 minutes of wall-clock time and motivated the
-choices of latent dim, small model size, and a two-class data subset.
-Generated samples are recognisably vehicle-shaped but blurry — the canonical
-failure mode of VAEs on natural images — and reconstructions preserve coarse
-structure while discarding fine texture. Latent-space interpolations are
-smooth, supporting the interpretation that the model learned a continuous,
-navigable latent representation. The principal limitations are sample
-sharpness (a property of the VAE objective itself) and the small spatial
-resolution of CIFAR-10; both are discussed further in the accompanying
+subset of CIFAR-10 for unconditional image generation, using Adam and the
+standard ELBO objective for 20 epochs on CPU. Both the reconstruction (BCE)
+and KL components decreased smoothly and the train/test ELBO tracked closely,
+indicating stable optimisation with no severe overfitting in the available
+budget. The principal training challenge was the **CPU-only compute budget**
+(no CUDA was available in the Hyper-V development VM), which capped practical
+training at roughly 14 minutes of wall-clock time and motivated the small
+model size, latent dim, and two-class data subset. Generated samples are
+recognisably vehicle-shaped but blurry — the canonical failure mode of VAEs on
+natural images — while reconstructions preserve coarse structure but discard
+fine texture, and latent-space interpolations are smooth, supporting the
+interpretation that the model learned a continuous, navigable latent
+representation. The principal limitations are sample sharpness (intrinsic to
+the VAE objective) and the small spatial resolution of CIFAR-10, both
+discussed further in the accompanying
 `Generative_AI_Analysis_Report.pdf`.""")
 
 # ---------------------------------------------------------------------------
