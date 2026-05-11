@@ -115,7 +115,7 @@ print(f'classes kept : {[CIFAR_CLASSES[i] for i in sorted(KEEP)]}')
 """)
 
 code("""\
-# Class balance check
+# Class balance: count + visualisation with seaborn
 train_labels = [train_full.targets[i] for i in train_idx]
 test_labels  = [test_full.targets[i]  for i in test_idx]
 balance = pd.DataFrame({
@@ -123,6 +123,13 @@ balance = pd.DataFrame({
     'class': [CIFAR_CLASSES[t] for t in train_labels + test_labels],
 })
 print(balance.groupby(['split','class']).size().unstack(fill_value=0))
+
+plt.figure(figsize=(6, 3.2))
+sns.countplot(data=balance, x='class', hue='split',
+              order=[CIFAR_CLASSES[i] for i in sorted(KEEP)])
+plt.title('Class balance — vehicle subset (train vs test)')
+plt.ylabel('image count'); plt.xlabel('')
+plt.tight_layout(); plt.savefig('fig_class_balance.png', dpi=120, bbox_inches='tight'); plt.show()
 """)
 
 code("""\
