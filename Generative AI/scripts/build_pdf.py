@@ -7,7 +7,7 @@ acceptable for the report's small number of equations.
 from pathlib import Path
 from markdown_pdf import MarkdownPdf, Section
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 md_path  = here / 'Generative_AI_Analysis_Report.md'
 pdf_path = here / 'Generative_AI_Analysis_Report.pdf'
 

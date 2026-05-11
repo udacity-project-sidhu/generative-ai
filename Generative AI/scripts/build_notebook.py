@@ -133,7 +133,7 @@ for ax, idx in zip(axes.flatten(), random.sample(range(len(train_ds)), 16)):
     ax.imshow(img.permute(1, 2, 0).numpy())
     ax.set_title(CIFAR_CLASSES[label], fontsize=8)
     ax.axis('off')
-plt.suptitle('CIFAR-10 vehicle subset — representative training samples')
+plt.suptitle('Figure 1 — CIFAR-10 vehicle subset: representative training samples')
 plt.tight_layout(); plt.savefig('fig_samples.png', dpi=120, bbox_inches='tight'); plt.show()
 """)
 
@@ -286,6 +286,15 @@ for epoch in range(1, EPOCHS + 1):
 print(f'\\ntotal training time: {time.time()-t0:0.1f} s')
 hist_df = pd.DataFrame(history)
 hist_df.to_csv('training_history.csv', index=False)
+
+# Per-dimension normalisation of the final ELBO. Because the reconstruction term
+# here is BCE on continuous pixels (not a discretised log-likelihood), this
+# scalar is a stable diagnostic of training progress, NOT a true bits/dim figure
+# comparable to published numbers.
+final_val_elbo = history[-1]['val_loss']
+nat_per_dim = final_val_elbo / (3 * 32 * 32)
+print(f'final val ELBO/img : {final_val_elbo:.2f} nats')
+print(f'normalised         : {nat_per_dim:.4f} (BCE+KL) / dim')
 hist_df
 """)
 
@@ -294,12 +303,12 @@ fig, axes = plt.subplots(1, 2, figsize=(11, 3.6))
 axes[0].plot(hist_df['epoch'], hist_df['train_loss'], label='train', marker='o')
 axes[0].plot(hist_df['epoch'], hist_df['val_loss'],   label='val',   marker='s')
 axes[0].set_xlabel('epoch'); axes[0].set_ylabel('ELBO loss / image')
-axes[0].set_title('Total ELBO loss'); axes[0].legend()
+axes[0].set_title('Figure 2a — Total ELBO loss'); axes[0].legend()
 
 axes[1].plot(hist_df['epoch'], hist_df['train_bce'], label='BCE (recon)', marker='o')
 axes[1].plot(hist_df['epoch'], hist_df['train_kld'], label='KL',           marker='s')
 axes[1].set_xlabel('epoch'); axes[1].set_ylabel('per-image term (train)')
-axes[1].set_title('Reconstruction vs KL'); axes[1].legend()
+axes[1].set_title('Figure 2b — Reconstruction vs KL'); axes[1].legend()
 
 plt.tight_layout(); plt.savefig('fig_loss.png', dpi=120, bbox_inches='tight'); plt.show()
 """)
@@ -331,7 +340,7 @@ with torch.no_grad():
     x_real = x_real[:8].to(device)
     x_recon, _, _ = model(x_real)
     pair = torch.cat([x_real, x_recon], dim=0)
-show_grid(pair, 'Top: real test images   |   Bottom: VAE reconstructions',
+show_grid(pair, 'Figure 3 — Top: real test images   |   Bottom: VAE reconstructions',
           'fig_reconstructions.png', nrow=8)
 """)
 
@@ -340,7 +349,7 @@ code("""\
 with torch.no_grad():
     z = torch.randn(32, LATENT_DIM, device=device)
     samples = model.dec(z)
-show_grid(samples, 'Random samples — z ~ N(0, I)', 'fig_samples_prior.png', nrow=8)
+show_grid(samples, 'Figure 4 — Random samples from the prior: z ~ N(0, I)', 'fig_samples_prior.png', nrow=8)
 """)
 
 code("""\
@@ -353,7 +362,7 @@ with torch.no_grad():
     alphas = torch.linspace(0, 1, steps=8, device=device).unsqueeze(1)
     z_interp = (1 - alphas) * mu[0:1] + alphas * mu[1:2]
     interp = model.dec(z_interp)
-show_grid(interp, 'Latent interpolation: test-image A  →  test-image B',
+show_grid(interp, 'Figure 5 — Latent interpolation: test image A  →  test image B',
           'fig_interpolation.png', nrow=8)
 """)
 
@@ -396,6 +405,6 @@ resolution of CIFAR-10; both are discussed further in the accompanying
 
 # ---------------------------------------------------------------------------
 nb['cells'] = cells
-out = Path(__file__).parent / 'generative_model.ipynb'
+out = Path(__file__).resolve().parent.parent / 'generative_model.ipynb'
 nbf.write(nb, out)
 print(f'wrote {out}  ({len(cells)} cells)')

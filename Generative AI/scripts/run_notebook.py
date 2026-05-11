@@ -3,7 +3,7 @@ from pathlib import Path
 import nbformat
 from nbclient import NotebookClient
 
-here = Path(__file__).parent
+here = Path(__file__).resolve().parent.parent
 nb_path = here / 'generative_model.ipynb'
 
 print(f'reading  {nb_path}')
