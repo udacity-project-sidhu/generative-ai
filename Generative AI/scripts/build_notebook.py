@@ -306,7 +306,7 @@ hist_df
 """)
 
 code("""\
-fig, axes = plt.subplots(1, 2, figsize=(11, 3.6))
+fig, axes = plt.subplots(1, 2, figsize=(14, 5.4))
 axes[0].plot(hist_df['epoch'], hist_df['train_loss'], label='train', marker='o')
 axes[0].plot(hist_df['epoch'], hist_df['val_loss'],   label='val',   marker='s')
 axes[0].set_xlabel('epoch'); axes[0].set_ylabel('ELBO loss / image')
@@ -317,7 +317,7 @@ axes[1].plot(hist_df['epoch'], hist_df['train_kld'], label='KL',           marke
 axes[1].set_xlabel('epoch'); axes[1].set_ylabel('per-image term (train)')
 axes[1].set_title('Figure 2b — Reconstruction vs KL'); axes[1].legend()
 
-plt.tight_layout(); plt.savefig('fig_loss.png', dpi=120, bbox_inches='tight'); plt.show()
+plt.tight_layout(); plt.savefig('fig_loss.png', dpi=160, bbox_inches='tight'); plt.show()
 """)
 
 # ---------------------------------------------------------------------------
@@ -345,12 +345,13 @@ def show_grid(tensor, title, save_as, nrow=8, row_labels=None):
     H, W = img.shape[0], img.shape[1]
     cell_w = W / nrow
     cell_h = H / nrows
-    plt.figure(figsize=(nrow*1.2 + 0.4, nrows*1.2 + 0.8))
-    plt.imshow(img); plt.axis('off'); plt.title(title)
-    # column indices above
+    plt.figure(figsize=(nrow*1.2 + 0.4, nrows*1.2 + 1.0))
+    plt.imshow(img); plt.axis('off')
+    plt.title(title, pad=22)
+    # column indices just above the grid (between grid and title)
     for c in range(nrow):
         x = (c + 0.5) * cell_w
-        plt.text(x, -6, f'c{c+1}', ha='center', va='bottom', fontsize=8, color='black')
+        plt.text(x, -2, f'c{c+1}', ha='center', va='bottom', fontsize=8, color='black')
     # row labels at left
     labels = row_labels if row_labels is not None else [f'r{r+1}' for r in range(nrows)]
     for r, lab in enumerate(labels):

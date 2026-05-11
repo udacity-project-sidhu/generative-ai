@@ -8,15 +8,17 @@
 
 ## 1. Overview
 
-This project implements and trains a **convolutional Variational Autoencoder (VAE)** [1] for unconditional image generation, using a two-class subset of the **CIFAR-10** image dataset [2] consisting of the `automobile` and `truck` classes. The system takes no input at generation time — samples are drawn from the latent prior $z \sim \mathcal{N}(0, I)$ and decoded into 32×32 RGB images that resemble real vehicle photographs. The notebook covers the full pipeline: data loading and inspection, model construction, ELBO-based training, generation of samples, and qualitative evaluation including reconstruction, prior sampling, and latent-space interpolation. The goal of the project is correct implementation, honest evaluation of generated outputs, and grounded ethical reasoning, rather than maximum sample fidelity.
+This project implements and trains a **convolutional Variational Autoencoder (VAE)** [1] for unconditional image generation, using a two-class subset of the **CIFAR-10** image dataset [2] consisting of the `automobile` and `truck` classes. The system takes no input at generation time — samples are drawn from the latent prior *z ∼ N(0, I)* and decoded into 32×32 RGB images that resemble real vehicle photographs. The notebook covers the full pipeline: data loading and inspection, model construction, ELBO-based training, generation of samples, and qualitative evaluation including reconstruction, prior sampling, and latent-space interpolation. The goal of the project is correct implementation, honest evaluation of generated outputs, and grounded ethical reasoning, rather than maximum sample fidelity.
 
 ## 2. Dataset Description
 
 CIFAR-10 [2] is a public benchmark dataset of 60,000 32×32 colour images uniformly partitioned into ten classes (50,000 train / 10,000 test). It is curated from real photographs, is not synthetic or AI-generated, and is publicly available for academic use. Of the ten classes the project keeps two — `automobile` (5,000 train / 1,000 test) and `truck` (5,000 train / 1,000 test) — for a total of **10,000 training and 2,000 test images**.
 
-The motivation for restricting to a two-class subset is that a small VAE trained for a modest number of CPU epochs cannot model the full diversity of CIFAR-10 well; constraining the data to two visually-related classes (vehicles, similar silhouettes, similar typical backgrounds) gives the model a single coherent visual concept and produces qualitatively interpretable samples. The dataset is auto-downloaded by `torchvision.datasets.CIFAR10(..., download=True)`; no manual download is required. Pixels are scaled to $[0,1]$ and used unnormalised so that the decoder's per-pixel sigmoid output range matches the reconstruction target. **No data augmentation is applied**, because for a generative model augmentation changes the data distribution being learned and therefore changes the meaning of the generated samples.
+The motivation for restricting to a two-class subset is that a small VAE trained for a modest number of CPU epochs cannot model the full diversity of CIFAR-10 well; constraining the data to two visually-related classes (vehicles, similar silhouettes, similar typical backgrounds) gives the model a single coherent visual concept and produces qualitatively interpretable samples. The dataset is auto-downloaded by `torchvision.datasets.CIFAR10(..., download=True)`; no manual download is required. Pixels are scaled to **[0, 1]** and used unnormalised so that the decoder's per-pixel sigmoid output range matches the reconstruction target. **No data augmentation is applied**, because for a generative model augmentation changes the data distribution being learned and therefore changes the meaning of the generated samples.
 
 ![Figure 1. Representative training samples from the vehicle subset (automobile, truck).](fig_samples.png)
+
+*Figure 1. Representative training samples from the vehicle subset (automobile, truck).*
 
 ## 3. Model Design and Training Approach
 
@@ -25,8 +27,11 @@ The motivation for restricting to a two-class subset is that a small VAE trained
 The model is a small convolutional VAE with three down-sampling encoder blocks and three up-sampling decoder blocks; latent dimension is 64. Each spatial halving doubles the channel count, a standard convolutional-autoencoder pattern [3]. The full layer stack is:
 
 - **Input:** 3 × 32 × 32 RGB image.
-- **Encoder:** Conv 4×4 stride 2 + ReLU → 32 × 16 × 16; Conv 4×4 stride 2 + ReLU → 64 × 8 × 8; Conv 4×4 stride 2 + ReLU → 128 × 4 × 4; flatten + two Linear heads producing $\mu, \log\sigma^2 \in \mathbb{R}^{64}$.
-- **Sampling:** reparameterisation $z = \mu + \sigma \odot \varepsilon$ with $\varepsilon \sim \mathcal{N}(0, I)$, giving $z \in \mathbb{R}^{64}$.
+- **Encoder:** Conv 4×4 stride 2 + ReLU → 32 × 16 × 16; Conv 4×4 stride 2 + ReLU → 64 × 8 × 8; Conv 4×4 stride 2 + ReLU → 128 × 4 × 4; flatten + two Linear heads producing **μ, logσ² ∈ ℝ⁶⁴**.
+- **Sampling:** reparameterisation
+
+  ![reparameterisation: z = mu + sigma * epsilon, with epsilon ~ N(0, I), z in R^64](eq_reparam.png)
+
 - **Decoder:** Linear → reshape to 128 × 4 × 4; ConvTranspose 4×4 stride 2 + ReLU → 64 × 8 × 8; ConvTranspose 4×4 stride 2 + ReLU → 32 × 16 × 16; ConvTranspose 4×4 stride 2 + Sigmoid → 3 × 32 × 32.
 
 The **reparameterisation trick** [1] makes the stochastic latent sample differentiable with respect to the encoder parameters and is what enables end-to-end gradient training of the variational objective. **Convolutional layers** are appropriate because CIFAR images have strong spatial locality and convolutions provide weight-shared, translation-equivariant feature extraction, which is foundational to modern image-generation architectures [3].
@@ -35,17 +40,13 @@ The **reparameterisation trick** [1] makes the stochastic latent sample differen
 
 The training objective is the **negative evidence lower bound (ELBO)**, written as a minimisation:
 
-$$
-\mathcal{L} \;=\; \underbrace{\mathrm{BCE}(\hat{x}, x)}_{\text{reconstruction}}
-\;+\;
-\underbrace{\tfrac{1}{2}\sum_i\!\left(\mu_i^2 + \sigma_i^2 - \log\sigma_i^2 - 1\right)}_{D_{KL}\bigl(q(z|x)\,\Vert\,\mathcal{N}(0, I)\bigr)}
-$$
+![ELBO loss: L = BCE(x_hat, x) + (1/2) sum_i ( mu_i^2 + sigma_i^2 - log sigma_i^2 - 1 )](eq_elbo.png)
 
-The reconstruction term is a **summed binary cross-entropy** over the 3 × 32 × 32 = 3,072 pixel channels per image (the standard pixel-wise Bernoulli/BCE choice for sigmoid-output VAEs on bounded-pixel inputs); the KL term is the closed-form Gaussian KL between the encoder's posterior and the unit-Gaussian prior. The two terms are summed (not averaged over pixels) so they are on the same per-image scale, which is what allows the standard ELBO without a $\beta$-VAE re-weighting [4].
+The reconstruction term is a **summed binary cross-entropy** over the 3 × 32 × 32 = 3,072 pixel channels per image (the standard pixel-wise Bernoulli/BCE choice for sigmoid-output VAEs on bounded-pixel inputs); the KL term is the closed-form Gaussian KL between the encoder's posterior and the unit-Gaussian prior. The two terms are summed (not averaged over pixels) so they are on the same per-image scale, which is what allows the standard ELBO without a **β-VAE** re-weighting [4].
 
 ### Training setup
 
-* **Optimiser:** Adam, learning rate $1\times 10^{-3}$, default $\beta$s.
+* **Optimiser:** Adam, learning rate **1 × 10⁻³**, default βs.
 * **Batch size:** 128.
 * **Epochs:** 20 (CPU).
 * **Seed:** 42 (controls model init, sampling, and `numpy`/`random`).
@@ -61,6 +62,8 @@ The held-out CIFAR-10 vehicle test split (2,000 images) is used as an unseen-dat
 
 ![Figure 2. Per-epoch training and validation ELBO (left) and the per-epoch decomposition into reconstruction (BCE) and KL terms (right).](fig_loss.png)
 
+*Figure 2. Per-epoch training and validation ELBO (left) and the per-epoch decomposition into reconstruction (BCE) and KL terms (right).*
+
 Selected per-epoch metrics (per-image, lower is better for ELBO/BCE; KL grows as the latent code becomes informative):
 
 - **Epoch 1:** train ELBO 2020.17, val ELBO 1910.62, train BCE 2008.77, train KL 11.40.
@@ -69,9 +72,9 @@ Selected per-epoch metrics (per-image, lower is better for ELBO/BCE; KL grows as
 - **Epoch 15:** train ELBO 1775.67, val ELBO 1776.65, train BCE 1731.36, train KL 44.30.
 - **Epoch 20:** train ELBO **1771.61**, val ELBO **1773.14**, train BCE 1725.48, train KL 46.13.
 
-As a single-number quantitative summary, the final validation ELBO of 1773.14 nats per image corresponds to **≈ 0.577 nats per pixel-channel** (1773.14 / 3,072) when divided across the 3 × 32 × 32 = 3,072 channel dimensions. Note that because this implementation uses binary cross-entropy on continuous pixel values in $[0,1]$ rather than a discretised log-likelihood, this number is **not directly comparable** to the bits-per-dimension figures published for CIFAR-10 VAEs in the literature [5]; it is reported as a stable scalar diagnostic of training progress only.
+As a single-number quantitative summary, the final validation ELBO of 1773.14 nats per image corresponds to **≈ 0.577 nats per pixel-channel** (1773.14 / 3,072) when divided across the 3 × 32 × 32 = 3,072 channel dimensions. Note that because this implementation uses binary cross-entropy on continuous pixel values in **[0, 1]** rather than a discretised log-likelihood, this number is **not directly comparable** to the bits-per-dimension figures published for CIFAR-10 VAEs in the literature [5]; it is reported as a stable scalar diagnostic of training progress only.
 
-Both the reconstruction (BCE) and KL components decreased smoothly throughout training. The KL term **grew** from 11.4 to 46.1 over the 20 epochs — the encoder is putting non-trivial information into the latent code rather than collapsing posterior $q(z|x)$ onto the prior, which would be the diagnostic signature of **posterior collapse** [4]. Training and validation ELBO track closely throughout (the largest train/val gap is ~1.5 ELBO points at epoch 10), so there is no evidence of substantial overfitting in the available training budget. A small validation noise spike at epoch 17 (val 1794, vs the surrounding ~1779 trend) is consistent with mini-batch and reparameterisation-noise stochasticity rather than instability.
+Both the reconstruction (BCE) and KL components decreased smoothly throughout training. The KL term **grew** from 11.4 to 46.1 over the 20 epochs — the encoder is putting non-trivial information into the latent code rather than collapsing posterior **q(z|x)** onto the prior, which would be the diagnostic signature of **posterior collapse** [4]. Training and validation ELBO track closely throughout (the largest train/val gap is ~1.5 ELBO points at epoch 10), so there is no evidence of substantial overfitting in the available training budget. A small validation noise spike at epoch 17 (val 1794, vs the surrounding ~1779 trend) is consistent with mini-batch and reparameterisation-noise stochasticity rather than instability.
 
 ### Generated outputs
 
@@ -79,19 +82,33 @@ Three qualitative views of the trained model are reported below. Each is a deter
 
 **Reconstructions.** Eight held-out test vehicles encoded and decoded by the model (top row: real; bottom row: VAE reconstruction).
 
-![Figure 3. Top: real test images. Bottom: VAE reconstructions of the same images. Columns are labelled c1–c8.](fig_reconstructions.png)
+![Figure 3. Top: real test images. Bottom: VAE reconstructions of the same images. Columns are labelled c1 to c8.](fig_reconstructions.png)
+
+*Figure 3. Top: real test images. Bottom: VAE reconstructions of the same images. Columns are labelled c1–c8.*
 
 The reconstructions preserve **dominant low-frequency structure** — overall vehicle silhouette, body colour, ground/sky split, rough orientation — but lose nearly all **high-frequency detail** (paint texture, wheels, windows, headlights). Concretely from Figure 3: the **best reconstruction is c5** (red fire-truck), where the dominant red body colour and a coarse truck silhouette are preserved; the **worst is c8** (the light-coloured antique pickup against a pale background), where the reconstruction collapses into a near-uniform pale wash with no recoverable vehicle shape; and the **typical case is c2/c3** (purple SUV / utility truck), where the body colour is approximately right but the vehicle is reduced to a horizontal blur. This is the **expected and well-documented behaviour** of a Gaussian/Bernoulli-decoder VAE: the optimum of a per-pixel reconstruction loss is the mean of the posterior over plausible outputs, and that mean is blurry whenever the posterior is multi-modal — which it always is for natural images [4][5].
 
-**Random samples from the prior.** Thirty-two images decoded from $z \sim \mathcal{N}(0, I)$, with no input image.
+**Random samples from the prior.** Thirty-two images decoded from
 
-![Figure 4. Random samples from the prior — z ~ N(0, I). 4 rows × 8 columns; rows are r1–r4 (top to bottom), columns c1–c8 (left to right).](fig_samples_prior.png)
+![z ~ N(0, I)](eq_prior.png)
+
+with no input image.
+
+![Figure 4. Random samples from the prior z ~ N(0, I). 4 rows by 8 columns; rows are r1 to r4 (top to bottom), columns c1 to c8 (left to right).](fig_samples_prior.png)
+
+*Figure 4. Random samples from the prior — z ∼ N(0, I). 4 rows × 8 columns; rows are r1–r4 (top to bottom), columns c1–c8 (left to right).*
 
 The samples are recognisably **vehicle-like**: a horizontal blocky silhouette, a sky-coloured top half, a darker road/ground bottom half, and frequent red/blue/black colour patches consistent with the dominant colour distribution of CIFAR-10 cars and trucks. Concretely from Figure 4: the **clearest vehicle silhouettes are r3c2 and r3c3** (red car/truck against pale background — a visible body shape, identifiable roofline, distinct ground-level shadow); the **worst failures are r1c1 and r4c1** (formless chromatic blobs with no recoverable horizontal silhouette — the canonical "vehicle-shaped noise" failure); and **r1c8** is an instance of the "background-only" failure (a blue/grey sky wash with no foreground vehicle structure). They are however collectively **blurry and identity-less** — no individual sample shows recognisable wheels, windows, or model-specific features. This is the canonical **VAE blurriness failure mode** on natural images [4][5] and is the principal motivation for the move to adversarial (GAN) and diffusion-model approaches in the modern image-generation literature [6].
 
-**Latent-space interpolation.** Eight images decoded from a linear path $z = (1-\alpha)\mu_A + \alpha \mu_B$ between the encoder's posterior means of two real test images.
+**Latent-space interpolation.** Eight images decoded from a linear path
 
-![Figure 5. Latent interpolation between two test images (A on the left in c1, B on the right in c8). Columns c1–c8 correspond to interpolation weights α = 0, 1/7, 2/7, …, 1.](fig_interpolation.png)
+![z = (1 - alpha) mu_A + alpha mu_B](eq_interp.png)
+
+between the encoder's posterior means of two real test images.
+
+![Figure 5. Latent interpolation between two test images (A on the left in c1, B on the right in c8). Columns c1 to c8 correspond to interpolation weights alpha = 0, 1/7, 2/7, ..., 1.](fig_interpolation.png)
+
+*Figure 5. Latent interpolation between two test images (A on the left in c1, B on the right in c8). Columns c1–c8 correspond to interpolation weights α = 0, 1/7, 2/7, …, 1.*
 
 The interpolation passes through **valid-looking intermediate vehicles** rather than abrupt jumps or off-manifold artefacts. Specifically in Figure 5: c1 has a dominant red top region (inherited from image A); the red attenuates monotonically across c2–c5 with no sudden disappearance; by c6–c8 the red is gone and the vehicle body has acquired the darker tones of image B — a single smooth visual trajectory rather than a jump-cut at any intermediate α. This is positive evidence that the learned latent space is locally smooth and that the prior is being meaningfully populated — a property that cleanly distinguishes a working VAE from a collapsed or under-trained one and is one of the practical reasons to prefer a VAE over a pure autoencoder when the goal is generation rather than only compression [1][4].
 
@@ -134,7 +151,7 @@ These choices were not all originally motivated by responsible-use reasoning —
 
 **Realistic future improvements.**
 
-* **Move to a $\beta$-VAE [4]** with $\beta < 1$ to trade some KL regularisation for sharper reconstructions, and explore disentanglement of the resulting latent factors.
+* **Move to a β-VAE [4]** with **β < 1** to trade some KL regularisation for sharper reconstructions, and explore disentanglement of the resulting latent factors.
 * **Move to a vector-quantised VAE (VQ-VAE)** which replaces the continuous Gaussian latent with a discrete codebook and substantially improves sample sharpness on small natural images at modest extra cost.
 * **Move to a diffusion-based generator** [6] for sample fidelity. This was outside the project scope (the rubric does not require diffusion), but it is the modern approach for natural-image generation and the appropriate next step for any deployment-oriented version of this work.
 * **Quantitative metrics.** Compute Fréchet Inception Distance (FID) on prior samples vs. real test images. FID requires a reference Inception network and a few thousand samples, both of which were beyond the CPU budget here, but it would let sample quality be tracked over training rather than only inspected qualitatively.

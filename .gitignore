@@ -17,3 +17,6 @@ Generative AI/data/
 # OS
 Thumbs.db
 .DS_Store
+
+# Submission build artefacts
+Project5_submission*.zip
