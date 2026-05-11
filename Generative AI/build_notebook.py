@@ -381,12 +381,16 @@ subset of CIFAR-10 to perform unconditional image generation. Training was run
 for 20 epochs on CPU using Adam and the standard ELBO objective; both the
 reconstruction (BCE) and KL components decreased smoothly and the train/test
 ELBO tracked closely, indicating no severe overfitting in the available
-training budget. Generated samples are recognisably vehicle-shaped but blurry —
-the canonical failure mode of VAEs on natural images — and reconstructions
-preserve coarse structure while discarding fine texture. Latent-space
-interpolations are smooth, supporting the interpretation that the model learned
-a continuous, navigable latent representation. The principal limitations are
-sample sharpness (a property of the VAE objective itself) and the small spatial
+training budget. The principal training challenge was the **CPU-only compute
+budget** (no CUDA was available in the Hyper-V development VM), which capped
+practical training at roughly 14 minutes of wall-clock time and motivated the
+choices of latent dim, small model size, and a two-class data subset.
+Generated samples are recognisably vehicle-shaped but blurry — the canonical
+failure mode of VAEs on natural images — and reconstructions preserve coarse
+structure while discarding fine texture. Latent-space interpolations are
+smooth, supporting the interpretation that the model learned a continuous,
+navigable latent representation. The principal limitations are sample
+sharpness (a property of the VAE objective itself) and the small spatial
 resolution of CIFAR-10; both are discussed further in the accompanying
 `Generative_AI_Analysis_Report.pdf`.""")
 
