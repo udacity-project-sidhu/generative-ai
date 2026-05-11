@@ -334,10 +334,28 @@ Three qualitative views of model behavior:
    latent geometry is meaningful?""")
 
 code("""\
-def show_grid(tensor, title, save_as, nrow=8):
+def show_grid(tensor, title, save_as, nrow=8, row_labels=None):
+    \"\"\"Render a grid of images with column indices (1..nrow) above and optional
+    row labels to the left. Column / row indices let the written report cite
+    specific cells of a generated grid (e.g., 'Figure 4, row 2, column 5').\"\"\"
+    n = tensor.size(0)
+    nrows = n // nrow
     grid = make_grid(tensor.clamp(0,1).cpu(), nrow=nrow, padding=2)
-    plt.figure(figsize=(nrow*1.2, (tensor.size(0)//nrow)*1.2 + 0.6))
-    plt.imshow(grid.permute(1,2,0).numpy()); plt.axis('off'); plt.title(title)
+    img = grid.permute(1,2,0).numpy()
+    H, W = img.shape[0], img.shape[1]
+    cell_w = W / nrow
+    cell_h = H / nrows
+    plt.figure(figsize=(nrow*1.2 + 0.4, nrows*1.2 + 0.8))
+    plt.imshow(img); plt.axis('off'); plt.title(title)
+    # column indices above
+    for c in range(nrow):
+        x = (c + 0.5) * cell_w
+        plt.text(x, -6, f'c{c+1}', ha='center', va='bottom', fontsize=8, color='black')
+    # row labels at left
+    labels = row_labels if row_labels is not None else [f'r{r+1}' for r in range(nrows)]
+    for r, lab in enumerate(labels):
+        y = (r + 0.5) * cell_h
+        plt.text(-4, y, lab, ha='right', va='center', fontsize=8, color='black')
     plt.tight_layout(); plt.savefig(save_as, dpi=120, bbox_inches='tight'); plt.show()
 
 # (a) Reconstructions
@@ -348,7 +366,7 @@ with torch.no_grad():
     x_recon, _, _ = model(x_real)
     pair = torch.cat([x_real, x_recon], dim=0)
 show_grid(pair, 'Figure 3 — Top: real test images   |   Bottom: VAE reconstructions',
-          'fig_reconstructions.png', nrow=8)
+          'fig_reconstructions.png', nrow=8, row_labels=['real', 'recon'])
 """)
 
 code("""\
